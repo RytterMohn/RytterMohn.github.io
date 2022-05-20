@@ -3190,7 +3190,8 @@ h1.page-title + .tag-cloud-list {
 }
 #footer {
   position: relative;
-  background: #49b1f5;
+}
+#background: $light-blue {
   background-attachment: scroll;
   background-position: bottom;
   background-size: cover;
