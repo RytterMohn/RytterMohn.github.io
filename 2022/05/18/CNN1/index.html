@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Convolutional Neural Networks 1 | xuanworld</title><meta name="keywords" content="AI"><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1.图的基本介绍1.1图的表示什么是图？ 图（Graph）是由顶点的有穷非空集合和顶点之间边的集合组成，通常表示为：G (V,E)，其中，G表示一个图，V是图G中顶点的集合，E是图G中边的集合。  翻译成人话：图就是点和边构成的一个网 图如何表示？我们可以用矩阵来表示，如邻接矩阵。 邻接矩阵就是下图所示  有连接表示1，没连接表示为0 度就是一个点的边数 1.2图的特性子图定义  子图是图论的基本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Convolutional Neural Networks 1">
+<meta property="og:url" content="https://www.xuanworld.top/2022/05/18/CNN1/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="1.图的基本介绍1.1图的表示什么是图？ 图（Graph）是由顶点的有穷非空集合和顶点之间边的集合组成，通常表示为：G (V,E)，其中，G表示一个图，V是图G中顶点的集合，E是图G中边的集合。  翻译成人话：图就是点和边构成的一个网 图如何表示？我们可以用矩阵来表示，如邻接矩阵。 邻接矩阵就是下图所示  有连接表示1，没连接表示为0 度就是一个点的边数 1.2图的特性子图定义  子图是图论的基本">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.xuanworld.top/img/ai.jpg">
+<meta property="article:published_time" content="2022-05-18T08:52:34.000Z">
+<meta property="article:modified_time" content="2022-05-21T14:56:42.164Z">
+<meta property="article:author" content="Rytter">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.xuanworld.top/img/ai.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2022/05/18/CNN1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Convolutional Neural Networks 1',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-05-21 22:56:42'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/ai.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Convolutional Neural Networks 1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-05-21T14:56:42.164Z" title="更新于 2022-05-21 22:56:42">2022-05-21</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Convolutional Neural Networks 1"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-图的基本介绍"><a href="#1-图的基本介绍" class="headerlink" title="1.图的基本介绍"></a>1.图的基本介绍</h1><h2 id="1-1图的表示"><a href="#1-1图的表示" class="headerlink" title="1.1图的表示"></a>1.1图的表示</h2><h3 id="什么是图？"><a href="#什么是图？" class="headerlink" title="什么是图？"></a>什么是图？</h3><blockquote>
+<p>图（Graph）是由顶点的有穷非空集合和顶点之间边的集合组成，通常表示为：G (V,E)，其中，G表示一个图，V是图G中顶点的集合，E是图G中边的集合。</p>
+</blockquote>
+<p>翻译成人话：图就是点和边构成的一个网</p>
+<h3 id="图如何表示？"><a href="#图如何表示？" class="headerlink" title="图如何表示？"></a>图如何表示？</h3><p>我们可以用矩阵来表示，如邻接矩阵。</p>
+<p>邻接矩阵就是下图所示</p>
+<p><img src="https://s2.loli.net/2022/05/21/IRODYoxkTW9Gulc.jpg" alt="查看源图像"></p>
+<p>有连接表示1，没连接表示为0</p>
+<h3 id="度"><a href="#度" class="headerlink" title="度"></a>度</h3><p>就是一个点的边数</p>
+<h2 id="1-2图的特性"><a href="#1-2图的特性" class="headerlink" title="1.2图的特性"></a>1.2图的特性</h2><h3 id="子图"><a href="#子图" class="headerlink" title="子图"></a>子图</h3><p>定义</p>
+<blockquote>
+<p>子图是图论的基本概念之一，指节点集和边集分别是某一图的节点集的子集和边集的子集的图。</p>
+</blockquote>
+<p>人话</p>
+<blockquote>
+<p>图的一部分</p>
+</blockquote>
+<h3 id="连通图"><a href="#连通图" class="headerlink" title="连通图"></a>连通图</h3><p>定义</p>
+<blockquote>
+<p>对一个图 G = ( V, E )中的两点x和y，若存在交替的顶点和边的序列 （在有向图中要求有向边 属于 E ），则两点 x和y是连通的。. 是一条x到y的连通路径，x和y分别是起点和终点。. 当x=y时， 被称为 回路 。. 如果通路 中的边两两不同，则 是一条 简单通路 ，否则为一条 复杂通路 。. 如果图 G 中每两点间皆连通，则 G 是 连通图 。</p>
+</blockquote>
+<p>人话</p>
+<blockquote>
+<p>每个点都被线连起来</p>
+</blockquote>
+<h3 id="连通分量"><a href="#连通分量" class="headerlink" title="连通分量"></a>连通分量</h3><p>定义</p>
+<blockquote>
+<p>无向图G的极大连通子图称为G的连通分量( Connected Component)。任何连通图的连通分量只有一个，即是其自身，非连通的无向图有多个连通分量。</p>
+</blockquote>
+<p>人话</p>
+<blockquote>
+<p>看看能分成几个不连通的部分</p>
+</blockquote>
+<h3 id="有向图的连通性"><a href="#有向图的连通性" class="headerlink" title="有向图的连通性"></a>有向图的连通性</h3><h4 id="强连通图"><a href="#强连通图" class="headerlink" title="强连通图"></a>强连通图</h4><p>定义</p>
+<blockquote>
+<p>强连通图（Strongly Connected Graph）是指在有向图G中，如果对于每一对vi、vj，vi≠vj，从vi到vj和从vj到vi都存在路径，则称G是强连通图。有向图中的极大强连通子图称做有向图的强连通分量。</p>
+</blockquote>
+<p>人话</p>
+<blockquote>
+<p>根据方向都连起来</p>
+</blockquote>
+<h4 id="弱连通图"><a href="#弱连通图" class="headerlink" title="弱连通图"></a>弱连通图</h4><p>定义</p>
+<blockquote>
+<p>将有向图的所有的有向边替换为无向边，所得到的图称为原图的基图。如果一个有向图的基图是连通图，则有向图是弱连通图。</p>
+</blockquote>
+<p>人话</p>
+<blockquote>
+<p>不管方向都能连起来</p>
+</blockquote>
+<h3 id="最短路径"><a href="#最短路径" class="headerlink" title="最短路径"></a>最短路径</h3><p>寡人认为此定义无需解释</p>
+<h3 id="图直径"><a href="#图直径" class="headerlink" title="图直径"></a>图直径</h3><p>最短路径的距离</p>
+<h2 id="1-3图中心性"><a href="#1-3图中心性" class="headerlink" title="1.3图中心性"></a>1.3图中心性</h2><h4 id="度中心性"><a href="#度中心性" class="headerlink" title="度中心性"></a>度中心性</h4><script type="math/tex; mode=display">
+度中心性=\frac{N_{degree}}{n-1}</script><h4 id="特征向量中心性"><a href="#特征向量中心性" class="headerlink" title="特征向量中心性"></a>特征向量中心性</h4><p>特征向量中心性的基本思想是，一个节点的中心性是相邻节点中心性的函数。也就是说，与你连接的人越重要，你也就越重要。</p>
+<p>特征向量中心性和点度中心性不同，一个点度中心性高即拥有很多连接的节点，但特征向量中心性不一定高，因为所有的连接者有可能特征向量中心性很低。同理，特征向量中心性高并不意味着它的点度中心性高，它拥有很少但很重要的连接者也可以拥有高特征向量中心性。</p>
+<p>具体解释看这篇文章（<a target="_blank" rel="noopener" href="https://blog.csdn.net/vincent_duan/article/details/119872349">(52条消息) 特征向量中心性<em>vincent_duan的博客-CSDN博客</em>特征向量中心性</a>）</p>
+<h4 id="中介中心性"><a href="#中介中心性" class="headerlink" title="中介中心性"></a>中介中心性</h4><script type="math/tex; mode=display">
+Betweenness=\frac{经过该节点的最短路径}{其余两两节点的最短路径}</script><h4 id="连接中心性"><a href="#连接中心性" class="headerlink" title="连接中心性"></a>连接中心性</h4><script type="math/tex; mode=display">
+Closeness=\frac{n-1}{节点到其他节点最短路径之和}</script><h2 id="1-4网页排序算法"><a href="#1-4网页排序算法" class="headerlink" title="1.4网页排序算法"></a>1.4网页排序算法</h2><p><a href="https://www.xuanworld.top/2022/05/18/pagerank/">pagerank | xuanworld</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2022/05/18/CNN1/">https://www.xuanworld.top/2022/05/18/CNN1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a></div><div class="post_share"><div class="social-share" data-image="/img/ai.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/05/18/pagerank/"><img class="prev-cover" src="/img/cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">pagerank</div></div></a></div><div class="next-post pull-right"><a href="/2022/05/18/bloom/"><img class="next-cover" src="/img/cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">bloom</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%9B%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">1.图的基本介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1%E5%9B%BE%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="toc-number">1.1.</span> <span class="toc-text">1.1图的表示</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%BE%EF%BC%9F"><span class="toc-number">1.1.1.</span> <span class="toc-text">什么是图？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA%EF%BC%9F"><span class="toc-number">1.1.2.</span> <span class="toc-text">图如何表示？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%A6"><span class="toc-number">1.1.3.</span> <span class="toc-text">度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2%E5%9B%BE%E7%9A%84%E7%89%B9%E6%80%A7"><span class="toc-number">1.2.</span> <span class="toc-text">1.2图的特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E5%9B%BE"><span class="toc-number">1.2.1.</span> <span class="toc-text">子图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E9%80%9A%E5%9B%BE"><span class="toc-number">1.2.2.</span> <span class="toc-text">连通图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E9%80%9A%E5%88%86%E9%87%8F"><span class="toc-number">1.2.3.</span> <span class="toc-text">连通分量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E5%90%91%E5%9B%BE%E7%9A%84%E8%BF%9E%E9%80%9A%E6%80%A7"><span class="toc-number">1.2.4.</span> <span class="toc-text">有向图的连通性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%BA%E8%BF%9E%E9%80%9A%E5%9B%BE"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">强连通图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%B1%E8%BF%9E%E9%80%9A%E5%9B%BE"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">弱连通图</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"><span class="toc-number">1.2.5.</span> <span class="toc-text">最短路径</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E7%9B%B4%E5%BE%84"><span class="toc-number">1.2.6.</span> <span class="toc-text">图直径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3%E5%9B%BE%E4%B8%AD%E5%BF%83%E6%80%A7"><span class="toc-number">1.3.</span> <span class="toc-text">1.3图中心性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%A6%E4%B8%AD%E5%BF%83%E6%80%A7"><span class="toc-number">1.3.0.1.</span> <span class="toc-text">度中心性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F%E4%B8%AD%E5%BF%83%E6%80%A7"><span class="toc-number">1.3.0.2.</span> <span class="toc-text">特征向量中心性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E4%BB%8B%E4%B8%AD%E5%BF%83%E6%80%A7"><span class="toc-number">1.3.0.3.</span> <span class="toc-text">中介中心性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E4%B8%AD%E5%BF%83%E6%80%A7"><span class="toc-number">1.3.0.4.</span> <span class="toc-text">连接中心性</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4%E7%BD%91%E9%A1%B5%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95"><span class="toc-number">1.4.</span> <span class="toc-text">1.4网页排序算法</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android上传文件到服务器"/></a><div class="content"><a class="title" href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器">Android上传文件到服务器</a><time datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/18/android-contact/" title="Android获取通讯录信息"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android获取通讯录信息"/></a><div class="content"><a class="title" href="/2022/05/18/android-contact/" title="Android获取通讯录信息">Android获取通讯录信息</a><time datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/18/jscx/" title="超星章节内课件下载"><img src="/img/internet.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="超星章节内课件下载"/></a><div class="content"><a class="title" href="/2022/05/18/jscx/" title="超星章节内课件下载">超星章节内课件下载</a><time datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/18/pagerank/" title="pagerank"><img src="/img/cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pagerank"/></a><div class="content"><a class="title" href="/2022/05/18/pagerank/" title="pagerank">pagerank</a><time datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/18/CNN1/" title="Convolutional Neural Networks 1"><img src="/img/ai.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Convolutional Neural Networks 1"/></a><div class="content"><a class="title" href="/2022/05/18/CNN1/" title="Convolutional Neural Networks 1">Convolutional Neural Networks 1</a><time datetime="2022-05-18T08:52:34.000Z" title="发表于 2022-05-18 16:52:34">2022-05-18</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
