@@ -1,0 +1,233 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>SVM的简单理论 | xuanworld</title><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="SVM简单理论间隔与支持向量我们就简单举个例子，假设我们有一个男女生身高体重的数据集，我们想能不能通过学习这个数据集训练一个模型，然后这个模型能够读取一个人的身高体重数据，然后判断出这个人是女生还是男生。我们的想法是这样，构建一个二维的平面，横纵坐标是身高体重，这样我们就能够看出它的分布情况。(橙黄色是女生，蓝色是男生)  ok,我们就得到了这样一个的分布情况，那么我们现在就想，能不能画一条线，让">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SVM的简单理论">
+<meta property="og:url" content="https://www.xuanworld.top/2023/03/20/svm/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="SVM简单理论间隔与支持向量我们就简单举个例子，假设我们有一个男女生身高体重的数据集，我们想能不能通过学习这个数据集训练一个模型，然后这个模型能够读取一个人的身高体重数据，然后判断出这个人是女生还是男生。我们的想法是这样，构建一个二维的平面，横纵坐标是身高体重，这样我们就能够看出它的分布情况。(橙黄色是女生，蓝色是男生)  ok,我们就得到了这样一个的分布情况，那么我们现在就想，能不能画一条线，让">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.xuanworld.top/img/ai.jpg">
+<meta property="article:published_time" content="2023-03-20T00:36:20.000Z">
+<meta property="article:modified_time" content="2023-03-20T01:35:38.543Z">
+<meta property="article:author" content="Rytter">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.xuanworld.top/img/ai.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2023/03/20/svm/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'SVM的简单理论',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-20 09:35:38'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/ai.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">SVM的简单理论</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-20T00:36:20.000Z" title="发表于 2023-03-20 08:36:20">2023-03-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-20T01:35:38.543Z" title="更新于 2023-03-20 09:35:38">2023-03-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="SVM的简单理论"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="SVM简单理论"><a href="#SVM简单理论" class="headerlink" title="SVM简单理论"></a>SVM简单理论</h1><h2 id="间隔与支持向量"><a href="#间隔与支持向量" class="headerlink" title="间隔与支持向量"></a>间隔与支持向量</h2><p>我们就简单举个例子，假设我们有一个男女生身高体重的数据集，我们想能不能通过学习这个数据集训练一个模型，然后这个模型能够读取一个人的身高体重数据，然后判断出这个人是女生还是男生。我们的想法是这样，构建一个二维的平面，横纵坐标是身高体重，这样我们就能够看出它的分布情况。(橙黄色是女生，蓝色是男生)</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221127105612377-1679276132078-3.png" alt="image-20221127105612377"></p>
+<p>ok,我们就得到了这样一个的分布情况，那么我们现在就想，能不能画一条线，让这个线把男生和女生分开来，这样新来一个学生，我们就能根据它跟这个线的位置来判断这是男生还是女生。</p>
+<p>但现在问题来了，你看上面这个图，你没有办法画一条直线把这两类完全分离开，这就要讲到我们需要了解的知识了。</p>
+<p>（本篇博客使用的课件截取自B站数之道，侵删。）</p>
+<h3 id="硬间隔"><a href="#硬间隔" class="headerlink" title="硬间隔"></a>硬间隔</h3><p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/b84ae0ea5478d290c1ebed11eebdc281b194a116.png" alt="image"></p>
+<p>按上图这种，我们一定要将两种类型分类开来，不能相互混合，这种情况就是硬间隔</p>
+<h3 id="软间隔"><a href="#软间隔" class="headerlink" title="软间隔"></a>软间隔</h3><p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221127112256675-1679276132078-1.png" alt="image-20221127112256675"></p>
+<p>这种情况就是软间隔，我们允许出现一些这种异常点，但是这些异常点是有损失成本的，所以我们要综合考虑出一个方法，能够平衡这个间隔与损失，是这个分割更加合理。</p>
+<p>软间隔是相对复杂的一个问题，我们一会专门讲这个东西。</p>
+<h3 id="支持向量"><a href="#支持向量" class="headerlink" title="支持向量"></a>支持向量</h3><p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221127112420717-1679276132078-6.png" alt="image-20221127112420717"></p>
+<p>星号的点就是支持向量，这是分割边界经过的两个点。</p>
+<h2 id="SVM基本模型"><a href="#SVM基本模型" class="headerlink" title="SVM基本模型"></a>SVM基本模型</h2><p>我们现在暂时只讨论硬间隔问题，软间隔下面会讲到。</p>
+<p>如果我们要进行分类的话，其中最重要的一点就是我们要最大化r,r是点到线的距离，也就是这个间隔越大越好，这就牵扯出一个问题，如何才能使r最大，那么我们可以确定L的表达式，然后通过对r求导就可以计算出这个的最大值了。</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126220324164-1679276132078-8.png" alt="image-20221126220324164"></p>
+<p>首先我们给出一个超平面的方程，我们的超平面可以用一个方程来进行表示</p>
+<p>$w^Tx+b=0$</p>
+<p>我们简单解释一下这个方程</p>
+<p>x不是横坐标，而是指x这个点，x(X1,X2)这个点，这个$w^T$也是两个参数，至于为什么有个转置符号，就是为了使用向量相乘，我们可以使用线的方程进行类比，比如$[a,b]^T[x,y]+c=0 $可以写成$ax+by+c=0$这就是线的方程了。</p>
+<p>这样就可以唯一的表示一个平面，至于这个$w^T$，我们这样写其实就是为了兼容多维度的情况，如果有多个维度的话我们的$w^T $就会比二维多一个元素，因为在三维中两个方程才可以确定一个面能将空间分割（其实就是相当于把多个方程就合并了，比如在如果一个数据有三个数据，我们要进行区分，那就需要两个方程，如果有四个数据那我们就需要有三个方程去确定平面，我们就同意用$w^T $来进行表示）在我们这个例子中我们是在一个二维空间，所以我们完全可以将这个方程写成$ax+by+c=0$。（这一段看不懂也没关系，看完后面的自然也就懂了）</p>
+<p>首先我们可以得到一个点x到面的距离距离公式，这个初中就讲过，具体方法略了，总的公式在下面，这个就是空间中计算距离的方程，各个维度通用。</p>
+<p>$r=\frac{|w^Tx +b|}{||w||} $</p>
+<p>那么问题来了，知道距离方程了，我们如何才能确定好这个平面呢？</p>
+<p>如果我们要正确的进行分类，就要让不同的数据分隔在线的两端，这样的话其实更加方便了，因为我们知道向量是有方向的，方向相反，符号不同，我们只需要尽可能两端符号不同就行了，也就是说，如果我们发现两类向量到平面的方向相反，就说明这个平面是合理的</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126221421469-1679276132078-10.png" alt="image-20221126221421469"></p>
+<p>这就需要用到支持向量，也就是靠近平面最近的两个向量，至于为什么是2，因为它是等式两边都可以等比放大$w^T，b$都是可变的，所以取多少都可以，但是为了方便计算我们两个边都选1，这样加起来就是2，也就是最后的那个间隔的2.</p>
+<p>这样我们之前的问题就转化为，如果让满足分类条件（两类点在线的两边）的情况下，让这个间隔最大，用数学的方法来表示就是</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126222602224-1679276132078-14.png" alt="image-20221126222602224"></p>
+<p>关于这个的计算方法我就不在这里讲了，因为可能要讲上很久，需要很强的理论知识才能看懂，本篇博客只是介绍一个入门，不会太深，如果有兴趣可以看台湾大学或者斯坦福大学的公开课，他们讲的都很详细准确。</p>
+<h2 id="非线性可分问题"><a href="#非线性可分问题" class="headerlink" title="非线性可分问题"></a>非线性可分问题</h2><p>如果我们没有办法找出一个线将他们分割开怎么办？</p>
+<p>比如这样（故意找茬是不是，滑稽）</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126223537223-1679276132078-12.png" alt="image-20221126223537223"></p>
+<p>我们可以这样，我们给他加个维度，把它搞成三维，不就完了吗</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126223724128-1679276132078-16.png" alt="image-20221126223724128"></p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126223646082-1679276132078-18.png" alt="image-20221126223646082"></p>
+<p>牛皮！绝了</p>
+<p>我们想的是这样，假设$x_1,x_2$的内积是$<x_1,x_2>$</p>
+<p>存在某个变化方法$x$转化为高维的$\phi(x)$，然后高维中的内积为$&lt;\phi(x_1),\phi(x_2)&gt;$</p>
+<p>有一个函数K，$K（x_1,x_2）=&lt;\phi(x_1),\phi(x_2)&gt; $</p>
+<p>这种方法叫核技巧，K叫核函数</p>
+<p>映射到高维后我们就可以进行相应的处理了</p>
+<h2 id="软间隔-1"><a href="#软间隔-1" class="headerlink" title="软间隔"></a>软间隔</h2><p>这种方式就是我们允许存在一些点是错误的，但是这样我们就要定义一个代价函数使代价最小才可以</p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126225122688-1679276132078-20.png" alt="image-20221126225122688"></p>
+<p><img src="../../../../../../media/rytter/4B668EB62D56B05E/Documents/markdown/img/images/image-20221126225138553-1679276132078-22.png" alt="image-20221126225138553"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2023/03/20/svm/">https://www.xuanworld.top/2023/03/20/svm/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/ai.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/03/20/dll/"><img class="prev-cover" src="/img/cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">dll</div></div></a></div><div class="next-post pull-right"><a href="/2023/03/20/flowdroid/"><img class="next-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">最新版Flowdroid的使用方法2023</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#SVM%E7%AE%80%E5%8D%95%E7%90%86%E8%AE%BA"><span class="toc-number">1.</span> <span class="toc-text">SVM简单理论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%B4%E9%9A%94%E4%B8%8E%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F"><span class="toc-number">1.1.</span> <span class="toc-text">间隔与支持向量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E9%97%B4%E9%9A%94"><span class="toc-number">1.1.1.</span> <span class="toc-text">硬间隔</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E9%97%B4%E9%9A%94"><span class="toc-number">1.1.2.</span> <span class="toc-text">软间隔</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F"><span class="toc-number">1.1.3.</span> <span class="toc-text">支持向量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SVM%E5%9F%BA%E6%9C%AC%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">SVM基本模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%8F%AF%E5%88%86%E9%97%AE%E9%A2%98"><span class="toc-number">1.3.</span> <span class="toc-text">非线性可分问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E9%97%B4%E9%9A%94-1"><span class="toc-number">1.4.</span> <span class="toc-text">软间隔</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/dll/" title="dll"><img src="/img/cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="dll"/></a><div class="content"><a class="title" href="/2023/03/20/dll/" title="dll">dll</a><time datetime="2023-03-20T00:36:31.000Z" title="发表于 2023-03-20 08:36:31">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/svm/" title="SVM的简单理论"><img src="/img/ai.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SVM的简单理论"/></a><div class="content"><a class="title" href="/2023/03/20/svm/" title="SVM的简单理论">SVM的简单理论</a><time datetime="2023-03-20T00:36:20.000Z" title="发表于 2023-03-20 08:36:20">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/flowdroid/" title="最新版Flowdroid的使用方法2023"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="最新版Flowdroid的使用方法2023"/></a><div class="content"><a class="title" href="/2023/03/20/flowdroid/" title="最新版Flowdroid的使用方法2023">最新版Flowdroid的使用方法2023</a><time datetime="2023-03-20T00:36:09.000Z" title="发表于 2023-03-20 08:36:09">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/maven/" title="如何将maven整合到IDEA中"><img src="/img/internet.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何将maven整合到IDEA中"/></a><div class="content"><a class="title" href="/2023/03/20/maven/" title="如何将maven整合到IDEA中">如何将maven整合到IDEA中</a><time datetime="2023-03-20T00:36:09.000Z" title="发表于 2023-03-20 08:36:09">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/12/13/obfus/" title="How to deploy and use Obfuscapk"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="How to deploy and use Obfuscapk"/></a><div class="content"><a class="title" href="/2022/12/13/obfus/" title="How to deploy and use Obfuscapk">How to deploy and use Obfuscapk</a><time datetime="2022-12-13T05:49:26.000Z" title="发表于 2022-12-13 13:49:26">2022-12-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
