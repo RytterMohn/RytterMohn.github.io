@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Android逆向学习（一）vscode进行android逆向修改并重新打包 | xuanworld</title><meta name="keywords" content="android"><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Android逆向学习（一）vscode进行android逆向修改并重新打包写在前面其实我不知道这个文章能不能写下去，其实我已经开了很多坑但是都没填上，现在专利也发出去了，就开始填坑了，本坑的主要内容是关于android逆向，主要的教程来源来自52破解论坛的大佬课程，但是那是windows版，为喜欢用linux，所以这是一个有比较大改动的学习教程，不过我确信你在windows上也可以运行，let’">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android逆向学习（一）vscode进行android逆向修改并重新打包">
+<meta property="og:url" content="https://www.xuanworld.top/2023/09/03/android-re-1/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="Android逆向学习（一）vscode进行android逆向修改并重新打包写在前面其实我不知道这个文章能不能写下去，其实我已经开了很多坑但是都没填上，现在专利也发出去了，就开始填坑了，本坑的主要内容是关于android逆向，主要的教程来源来自52破解论坛的大佬课程，但是那是windows版，为喜欢用linux，所以这是一个有比较大改动的学习教程，不过我确信你在windows上也可以运行，let’">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.xuanworld.top/img/android.jpg">
+<meta property="article:published_time" content="2023-09-02T16:09:02.000Z">
+<meta property="article:modified_time" content="2023-09-02T16:09:59.493Z">
+<meta property="article:author" content="Rytter">
+<meta property="article:tag" content="android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.xuanworld.top/img/android.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2023/09/03/android-re-1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android逆向学习（一）vscode进行android逆向修改并重新打包',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-09-03 00:09:59'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/android.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Android逆向学习（一）vscode进行android逆向修改并重新打包</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-09-02T16:09:02.000Z" title="发表于 2023-09-03 00:09:02">2023-09-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-09-02T16:09:59.493Z" title="更新于 2023-09-03 00:09:59">2023-09-03</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Android逆向学习（一）vscode进行android逆向修改并重新打包"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Android逆向学习（一）vscode进行android逆向修改并重新打包"><a href="#Android逆向学习（一）vscode进行android逆向修改并重新打包" class="headerlink" title="Android逆向学习（一）vscode进行android逆向修改并重新打包"></a>Android逆向学习（一）vscode进行android逆向修改并重新打包</h1><h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>其实我不知道这个文章能不能写下去，其实我已经开了很多坑但是都没填上，现在专利也发出去了，就开始填坑了，本坑的主要内容是关于android逆向，主要的教程来源来自52破解论坛的大佬课程，但是那是windows版，为喜欢用linux，所以这是一个有比较大改动的学习教程，不过我确信你在windows上也可以运行，let’s go.</p>
+<h2 id="一、软件准备"><a href="#一、软件准备" class="headerlink" title="一、软件准备"></a>一、软件准备</h2><p>如上文所说，我是linux用户，所以就是用的linux下相同的替代品（我感觉linux下的软件更好用）</p>
+<h3 id="1、模拟器"><a href="#1、模拟器" class="headerlink" title="1、模拟器"></a>1、模拟器</h3><p>我使用的模拟器叫做xdroid，为认为这个做得要比android studio的好（当然指分析起来的时候），因为很多软件用的native code是arm架构下的，而android studio下模拟器主要是x86架构，很多软件无法进行分析。当然如果安装xdroid需要关闭security boot，就是在bios里面关闭。</p>
+<p>然后我们下载xdroid的安装包，直接./运行就好了，记得不要使用sudo ./ 会提示不可以。</p>
+<p>我们还需要安装的软件有开发助手，NP管理器，主要就是这两个用来进行逆向分析，而且这个是已经root好的，我们还可以直接使用adb进行调试，推荐右边使用单窗口，因为这样的话会比较方便查询activity。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/e37fb64ed46ed0c27dbe1508fa5999e97163022138e29438d1625e8128ff2355.png" alt="e37fb64ed46ed0c27dbe1508fa5999e97163022138e29438d1625e8128ff2355"></p>
+<p>adb的命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">adb devices</span><br><span class="line">adb -s xxxx root</span><br><span class="line">adb -s xxxx shell</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902234342.png" alt="20230902234342"></p>
+<h3 id="2、逆向使用的软件"><a href="#2、逆向使用的软件" class="headerlink" title="2、逆向使用的软件"></a>2、逆向使用的软件</h3><p>教程中使用的是NP管理器和开发助手，当然我感觉直接用NP管理器的话，不是特别优雅，毕竟最好还是直接逆向后在电脑上修改，这样会显得我们比较专业，所以我用到的软件是vscode和apktool，apktool这个我就不讲了，我在之前的博客中就介绍过这个东西。</p>
+<p>VScode的话我是用的APKLab拓展，这样可以更加方便的使用apktool以及其他的反编译软件，打包apk什么的也是非常的方便.</p>
+<p>我vscode的插件主要是：</p>
+<p>smalise:用来查看smali代码的，是apklab的前置软件</p>
+<p>apklab:主要的插件，是一个十分强大的插件，能够把apktool等各种工具给整合起来，直接使用键盘就可以直接操作了</p>
+<p>luna paint:这是一个用来编辑图片的软件，能够比较好的用来修改图片，当然这个不下载也可以，这个不影响</p>
+<p>smali2java：这是一个很好用的反编译的插件，能够将代码转化为java代码能够比较清晰的去查看代码的逻辑</p>
+<h4 id="软件的配置过程"><a href="#软件的配置过程" class="headerlink" title="软件的配置过程"></a>软件的配置过程</h4><p>我们主要配置的就只有apklab这个软件</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902223813.png" alt="20230902223813"></p>
+<p>前三个就是你的工具的路径，这个不用动就可以，这个会自动下载的</p>
+<p>后面的Keyalias是你个android开发签名，每个apk包是要有一个签名才可以进行安装的，既然反编译重新修改了，就得找个key重新进行签名才可以，这个生成的方法就是使用android studio进行生成，具体我不再讲解，这个直接查就好</p>
+<h2 id="二、对android文本进行修改并重新打包"><a href="#二、对android文本进行修改并重新打包" class="headerlink" title="二、对android文本进行修改并重新打包"></a>二、对android文本进行修改并重新打包</h2><p>下面到了吾爱的第一个作业，就是修改图片文本，我们这样作，首先按下（Ctrl+Shift+P）选择open apk，就可以打开你的那个安装包了，这是我们逆向之后的结构</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902224541.png" alt="20230902224541"></p>
+<p>然后我们需要使用开发助手查看我们当前的activity是哪一个，打开开发助手，然后点击当前activity，就可以看到页面上显示的类名了，然后我们再运行需要破解的软件，就可以看到当前的activity了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902224814.png" alt="20230902224814"></p>
+<p>然后就会显示这个东西</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902225347.png" alt="20230902225347"></p>
+<p>我们在vscode的安装包里查找这个activity的相关资源</p>
+<p>我们在smali代码中发现了第一句</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902225627.png" alt="20230902225627"></p>
+<p>修改了就好</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902230559.png" alt="20230902230559"></p>
+<p>我们在res里面可以发现layout，里面是布局文件，然后这里还有一个文本，修改即可</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902230824.png" alt="20230902230824"></p>
+<p>然后mipmap-xxxhdpi里面有图片，给他替换了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902230940.png" alt="20230902230940"></p>
+<p>然后我们根据之前的布局文件发现里面的文案是@string里面的，所以我们应该去查values里面找string.xml,修改tip1和first_tv，果然我们发现了相关的东西</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902231540.png" alt="20230902231540"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902231614.png" alt="20230902231614"></p>
+<p>我们照样进行修改</p>
+<p>修改完成后，别忘保存，然后我们右键apktool.yml，进行打包安装，打包的文件在你路度的dist文件里面，注意这个有点bug，容我慢慢给你讲</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902232442.png" alt="20230902232442"></p>
+<ol>
+<li>需要你打开其中一个软件后，你的adb才能查找到模拟器，所以记得打开开发助手或者其他软件让模拟器运行着，你再安装</li>
+<li>安装后里面没有这个图标，这个就是模拟器的bug了，可以通过开发助手来打开，所以凑合用就行，只要输出控制台显示没有问题就好</li>
+</ol>
+<p>所以我们安装后打开应用的方式就是在Manifest查看-&gt;软件名-&gt;右上角点打开应用,然后打开应用之后我们就是可以看到修改后的文件（这个安装包可以在真机上安装的，我试过了）</p>
+<p>然后我们看到了虎哥和一眼晚年的图片</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20230902233721.png" alt="20230902233721"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2023/09/03/android-re-1/">https://www.xuanworld.top/2023/09/03/android-re-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/android/">android</a></div><div class="post_share"><div class="social-share" data-image="/img/android.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/08/30/NDK3/"><img class="next-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android Native Code开发学习（三）对类进行操作</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android上传文件到服务器</div></div></a></div><div><a href="/2022/05/18/android-contact/" title="Android获取通讯录信息"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android获取通讯录信息</div></div></a></div><div><a href="/2023/03/20/apk-re/" title="Android反编译工具的使用（保姆级教程）"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-20</div><div class="title">Android反编译工具的使用（保姆级教程）</div></div></a></div><div><a href="/2023/03/20/flowdroid/" title="最新版Flowdroid的使用方法2023"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-20</div><div class="title">最新版Flowdroid的使用方法2023</div></div></a></div><div><a href="/2022/12/13/obfus/" title="How to deploy and use Obfuscapk"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-12-13</div><div class="title">How to deploy and use Obfuscapk</div></div></a></div><div><a href="/2023/03/20/proguard/" title="proguard"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-20</div><div class="title">proguard</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%B8%80%EF%BC%89vscode%E8%BF%9B%E8%A1%8Candroid%E9%80%86%E5%90%91%E4%BF%AE%E6%94%B9%E5%B9%B6%E9%87%8D%E6%96%B0%E6%89%93%E5%8C%85"><span class="toc-number">1.</span> <span class="toc-text">Android逆向学习（一）vscode进行android逆向修改并重新打包</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%BD%AF%E4%BB%B6%E5%87%86%E5%A4%87"><span class="toc-number">1.2.</span> <span class="toc-text">一、软件准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E6%A8%A1%E6%8B%9F%E5%99%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">1、模拟器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E9%80%86%E5%90%91%E4%BD%BF%E7%94%A8%E7%9A%84%E8%BD%AF%E4%BB%B6"><span class="toc-number">1.2.2.</span> <span class="toc-text">2、逆向使用的软件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E7%9A%84%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">软件的配置过程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AF%B9android%E6%96%87%E6%9C%AC%E8%BF%9B%E8%A1%8C%E4%BF%AE%E6%94%B9%E5%B9%B6%E9%87%8D%E6%96%B0%E6%89%93%E5%8C%85"><span class="toc-number">1.3.</span> <span class="toc-text">二、对android文本进行修改并重新打包</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/09/03/android-re-1/" title="Android逆向学习（一）vscode进行android逆向修改并重新打包"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（一）vscode进行android逆向修改并重新打包"/></a><div class="content"><a class="title" href="/2023/09/03/android-re-1/" title="Android逆向学习（一）vscode进行android逆向修改并重新打包">Android逆向学习（一）vscode进行android逆向修改并重新打包</a><time datetime="2023-09-02T16:09:02.000Z" title="发表于 2023-09-03 00:09:02">2023-09-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/08/30/NDK3/" title="Android Native Code开发学习（三）对类进行操作"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Native Code开发学习（三）对类进行操作"/></a><div class="content"><a class="title" href="/2023/08/30/NDK3/" title="Android Native Code开发学习（三）对类进行操作">Android Native Code开发学习（三）对类进行操作</a><time datetime="2023-08-30T06:51:00.000Z" title="发表于 2023-08-30 14:51:00">2023-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/08/30/NDK2/" title="Android Native Code开发学习（二）"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Native Code开发学习（二）"/></a><div class="content"><a class="title" href="/2023/08/30/NDK2/" title="Android Native Code开发学习（二）">Android Native Code开发学习（二）</a><time datetime="2023-08-30T06:50:58.000Z" title="发表于 2023-08-30 14:50:58">2023-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/08/30/NDK1/" title="Android Native Code开发学习（一）环境配置"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Native Code开发学习（一）环境配置"/></a><div class="content"><a class="title" href="/2023/08/30/NDK1/" title="Android Native Code开发学习（一）环境配置">Android Native Code开发学习（一）环境配置</a><time datetime="2023-08-30T06:50:54.000Z" title="发表于 2023-08-30 14:50:54">2023-08-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/08/30/mobile-ubuntu/" title="手把手教你做一个移动的系统盘"><img src="/img/os.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="手把手教你做一个移动的系统盘"/></a><div class="content"><a class="title" href="/2023/08/30/mobile-ubuntu/" title="手把手教你做一个移动的系统盘">手把手教你做一个移动的系统盘</a><time datetime="2023-08-30T06:50:38.000Z" title="发表于 2023-08-30 14:50:38">2023-08-30</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
