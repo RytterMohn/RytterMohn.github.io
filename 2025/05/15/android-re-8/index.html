@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Android逆向学习（八）Xposed快速上手(上) | xuanworld</title><meta name="keywords" content="android"><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Android逆向学习（八）Xposed快速上手(上)前言xposed是一个用来hook的工具，简而言之，通过替换&#x2F;system&#x2F;bin&#x2F;app_process程序控制zygote进程，这样的话，app_process在启动过程中会加载XposedBridge.jar这个jar包，从而完成对Zygote进程以及创建的Dalvik虚拟机的劫持。 看起来有点烧脑是不是，没关系，会用就行！ 之前的博客中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android逆向学习（八）Xposed快速上手(上)">
+<meta property="og:url" content="https://www.xuanworld.top/2025/05/15/android-re-8/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="Android逆向学习（八）Xposed快速上手(上)前言xposed是一个用来hook的工具，简而言之，通过替换&#x2F;system&#x2F;bin&#x2F;app_process程序控制zygote进程，这样的话，app_process在启动过程中会加载XposedBridge.jar这个jar包，从而完成对Zygote进程以及创建的Dalvik虚拟机的劫持。 看起来有点烧脑是不是，没关系，会用就行！ 之前的博客中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.xuanworld.top/img/android.jpg">
+<meta property="article:published_time" content="2025-05-15T13:02:10.000Z">
+<meta property="article:modified_time" content="2025-05-15T13:02:37.322Z">
+<meta property="article:author" content="Rytter">
+<meta property="article:tag" content="android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.xuanworld.top/img/android.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2025/05/15/android-re-8/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android逆向学习（八）Xposed快速上手(上)',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-05-15 21:02:37'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/android.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Android逆向学习（八）Xposed快速上手(上)</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-15T13:02:10.000Z" title="发表于 2025-05-15 21:02:10">2025-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-15T13:02:37.322Z" title="更新于 2025-05-15 21:02:37">2025-05-15</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Android逆向学习（八）Xposed快速上手(上)"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Android逆向学习（八）Xposed快速上手-上"><a href="#Android逆向学习（八）Xposed快速上手-上" class="headerlink" title="Android逆向学习（八）Xposed快速上手(上)"></a>Android逆向学习（八）Xposed快速上手(上)</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>xposed是一个用来hook的工具，简而言之，通过替换/system/bin/app_process程序控制zygote进程，这样的话，app_process在启动过程中会加载XposedBridge.jar这个jar包，从而完成对Zygote进程以及创建的Dalvik虚拟机的劫持。</p>
+<p>看起来有点烧脑是不是，没关系，会用就行！</p>
+<p>之前的博客中我们讲解了frida这个框架（个人比较喜欢用这个来分析），但是一个问题是frida框架需要通过电脑端进行控制，也就是我们需要在电脑端运行python程序，然后通过这个程序进行hook。</p>
+<p>如果说我们想要长久的使用一个hook程序，也就是不使用电脑也能hook,frida是很难实现的，但是xposed可以实现，只需要编写好插件，xposed就能根据这个插件长久的执行hook操作，不需要再使用电脑连接。</p>
+<p>不过xposed现在已经不再支持最新的系统，所以本章节在手机端主要用到的是Lsposed框架。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>首先讲解一下xposed原理，这就要涉及到android的基本的原理。</p>
+<p>Dalvik 是 Android 系统最初使用的虚拟机，用于执行 Android 应用程序。它不是 Java 虚拟机（JVM），但可以运行将 Java 源码编译成 <code>.dex</code>（Dalvik Executable）格式的字节码文件。每个 Android 应用都在一个独立的 Dalvik 实例中运行。</p>
+<blockquote>
+<p>注意：从 Android 5.0（Lollipop）开始，Dalvik 被新的 ART（Android Runtime）替代了，但原理上是类似的，都是“虚拟机”或“运行时环境”。</p>
+</blockquote>
+<p><strong>每个 Android 应用在运行时都会拥有一个独立的虚拟机实例</strong>（在 Dalvik 时代如此，后来的 ART 运行时也是一样的概念）。</p>
+<p>更准确地说：</p>
+<ul>
+<li>每个 App 运行在 <strong>自己的进程中</strong>；</li>
+<li>这个进程内有一个<strong>独立的虚拟机实例</strong>（Dalvik 或 ART）；</li>
+<li>各个 App 之间的虚拟机 <strong>互相隔离</strong>，互不影响。</li>
+</ul>
+<p>所以说，相当于每个虚拟机中负责保存变量等信息，具体执行的时候，再放到CPU上</p>
+<p>Xposed 的本质：<strong>修改 ART/Dalvik 的方法调用流程</strong></p>
+<p><strong>1. Android 应用运行流程复习（简化版）：</strong></p>
+<ol>
+<li>Java/Kotlin 代码编译成 <code>.dex</code>；</li>
+<li>运行时被 ART（或老版本的 Dalvik）虚拟机加载；</li>
+<li>虚拟机会调用类的方法；</li>
+<li><p>方法的执行依赖虚拟机内部的“方法表”（method table）和类元信息。</p>
+<p><strong>2. Xposed 的关键做法：</strong></p>
+</li>
+</ol>
+<blockquote>
+<p><strong>在方法被调用前，修改其在虚拟机中的元数据指针，插入你自己的代码逻辑。</strong></p>
+</blockquote>
+<p>换句话说，就是把这个“指向原始函数”的指针，改为“指向你自己的 Hook 逻辑”。</p>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><h3 id="手机环境"><a href="#手机环境" class="headerlink" title="手机环境"></a>手机环境</h3><p>首先在Magisk中开启Zygisk。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/58b11a8d40fe9413afd101f8e2c00942.png" alt="img"></p>
+<p>之后下载LSposed软件：<a target="_blank" rel="noopener" href="https://github.com/LSPosed/LSPosed">https://github.com/LSPosed/LSPosed</a></p>
+<p>下载安装完成后重启手机</p>
+<p>下载后桌面上可能不会出现图标，这时候在拨号键输入代号码 *#*#5776733#*#*</p>
+<p>就可以显示出LSposed控制面板，然后勾选强制显示就可以显示出桌面图标，方便进入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/880e36622ee040369d162573cf19ed4a.jpg" alt="img"></p>
+<p>到这里，LSposed就安装完成</p>
+<h3 id="电脑环境"><a href="#电脑环境" class="headerlink" title="电脑环境"></a>电脑环境</h3><p>首先使用Android Studio创建一个空activity</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/3436d03ce239299fdd3c52e07c1a211e.png" alt="img"></p>
+<p>之后的配置默认就好，如果习惯用java可以用java,因为现在google强推kotlin以替换java语言，所以这次我用的直接就是kotlin</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/242cccdfa96401ae53f92e2c48c617ee.png" alt="img"></p>
+<p>创建完成后，对目录结构进行配置，首先是下载xposed的包，可能有小伙伴要问，不是用的LSposed吗，为什么要用xposed。</p>
+<p>原因是LSposed兼容了原来的xposed插件，也就是可以利用原来xposed包开发LSposed包。</p>
+<p>下载包的话主要在以下几个文件内修改：</p>
+<h4 id="settings-gradle-kts"><a href="#settings-gradle-kts" class="headerlink" title="settings.gradle.kts"></a>settings.gradle.kts</h4><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">pluginManagement &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google &#123;</span><br><span class="line">            content &#123;</span><br><span class="line">                includeGroupByRegex(<span class="string">&quot;com\\.android.*&quot;</span>)</span><br><span class="line">                includeGroupByRegex(<span class="string">&quot;com\\.google.*&quot;</span>)</span><br><span class="line">                includeGroupByRegex(<span class="string">&quot;androidx.*&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mavenCentral()</span><br><span class="line">        gradlePluginPortal()</span><br><span class="line">        maven &#123; url =  uri(<span class="string">&quot;https://maven.aliyun.com/repository/public/&quot;</span>) &#125; <span class="comment">//添加这一行</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">dependencyResolutionManagement &#123;</span><br><span class="line">    repositoriesMode.<span class="keyword">set</span>(RepositoriesMode.FAIL_ON_PROJECT_REPOS)</span><br><span class="line">    repositories &#123;</span><br><span class="line">        maven &#123; url =  uri(<span class="string">&quot;https://maven.aliyun.com/repository/public/&quot;</span>) &#125; <span class="comment">//添加这一行</span></span><br><span class="line">        google()</span><br><span class="line">        mavenCentral()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">rootProject.name = <span class="string">&quot;LSposedHook&quot;</span></span><br><span class="line">include(<span class="string">&quot;:app&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="build-gradle-kts-app目录下的那个"><a href="#build-gradle-kts-app目录下的那个" class="headerlink" title="build.gradle.kts(app目录下的那个)"></a>build.gradle.kts(app目录下的那个)</h4><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">    compileOnly(<span class="string">&quot;de.robv.android.xposed:api:82&quot;</span>) <span class="comment">//添加这一行</span></span><br><span class="line">    implementation(libs.androidx.core.ktx)</span><br><span class="line">    implementation(libs.androidx.appcompat)</span><br><span class="line">    implementation(libs.material)</span><br><span class="line">    testImplementation(libs.junit)</span><br><span class="line">    androidTestImplementation(libs.androidx.junit)</span><br><span class="line">    androidTestImplementation(libs.androidx.espresso.core)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后Sync以下，就可以下载包了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/c54f8463f0c570d4ee73cf974f4e1f72.png" alt="img"></p>
+<p>下载完成之后，开始编写包，首先创建以下几个文件：</p>
+<ol>
+<li>assets下的xposed_init</li>
+<li>HookEntry</li>
+<li>在src/main/res/values下面创建一个arrays.xml文件</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/ba93524c16c1857b2975f1f2e8b6ff9e.png" alt="img"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/b84578c495553a1b57d6cf3f3e72b51f.png" alt="img"></p>
+<p>创建完成这三项之后，在AndroidManifest.xml下加入这些meta-data：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;xposedmodule&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:value</span>=<span class="string">&quot;true&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;xposeddescription&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:value</span>=<span class="string">&quot;Hook isVip() always return true&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;xposedminversion&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:value</span>=<span class="string">&quot;54&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;xposedscope&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:resource</span>=<span class="string">&quot;@array/xposedscope&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如下图所示，加入到application的标签中，这样LSposed才能识别到这是一个xposed插件：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/d10212026698c9a5d7e1d49a251bb4c0.png" alt="img"></p>
+<p>然后xposed_init中加入kt文件的包名，比如创建的kt文件叫HookEntry,那么xposed_init中就写入一个这个(就是包名加上类名)：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.example.lsposedhook.HookEntry</span><br></pre></td></tr></table></figure>
+<p>这样LSposed就知道这个类里面有插件的代码。</p>
+<p>之后在arrays.xml中加入以下内容：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;utf-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string-array</span> <span class="attr">name</span>=<span class="string">&quot;xposedscope&quot;</span> &gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 这里填写模块的作用应用的包名，能填多个,这里就填一个。 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.zj.wuaipojie<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">string-array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这可以表明该模块是用于这个应用的。</p>
+<h2 id="编写LSposed脚本"><a href="#编写LSposed脚本" class="headerlink" title="编写LSposed脚本"></a>编写LSposed脚本</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>通过hook完成挑战二</p>
+<h3 id="脚本编写"><a href="#脚本编写" class="headerlink" title="脚本编写"></a>脚本编写</h3><p>在HookEntry中写入：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.lsposedhook <span class="comment">// 定义当前类的包名，和项目结构对应</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 引入 Xposed 框架提供的接口和工具类</span></span><br><span class="line"><span class="keyword">import</span> de.robv.android.xposed.IXposedHookLoadPackage <span class="comment">// Xposed 的主接口，用于处理加载的包</span></span><br><span class="line"><span class="keyword">import</span> de.robv.android.xposed.callbacks.XC_LoadPackage <span class="comment">// 包加载时的回调参数</span></span><br><span class="line"><span class="keyword">import</span> de.robv.android.xposed.XposedBridge <span class="comment">// 提供日志输出等功能</span></span><br><span class="line"><span class="keyword">import</span> de.robv.android.xposed.XC_MethodReplacement <span class="comment">// 用于替换目标方法的实现</span></span><br><span class="line"><span class="keyword">import</span> de.robv.android.xposed.XposedHelpers <span class="comment">// 提供方法查找和 Hook 的辅助工具类</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HookEntry</span> : <span class="type">IXposedHookLoadPackage &#123; // 实现 Xposed 的主入口接口</span></span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">handleLoadPackage</span><span class="params">(lpparam: <span class="type">XC_LoadPackage</span>.<span class="type">LoadPackageParam</span>)</span></span> &#123;</span><br><span class="line">        <span class="comment">// 判断当前加载的包是否是我们要 Hook 的目标 App</span></span><br><span class="line">        <span class="keyword">if</span> (lpparam.packageName != <span class="string">&quot;com.zj.wuaipojie&quot;</span>) <span class="keyword">return</span> <span class="comment">// 如果不是目标包则直接返回，不做处理</span></span><br><span class="line"></span><br><span class="line">        XposedBridge.log(<span class="string">&quot;程序开始执行&quot;</span>) <span class="comment">// 打日志，说明模块开始执行 hook 操作</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// Hook 目标类中的 isvip 方法，并替换它的返回值为 true</span></span><br><span class="line">            XposedHelpers.findAndHookMethod(</span><br><span class="line">                <span class="string">&quot;com.zj.wuaipojie.ui.ChallengeSecond&quot;</span>, <span class="comment">// 要 hook 的类的完整类名（含包名）</span></span><br><span class="line">                lpparam.classLoader,                   <span class="comment">// 类加载器，用于加载目标类</span></span><br><span class="line">                <span class="string">&quot;isvip&quot;</span>,                               <span class="comment">// 要 hook 的方法名</span></span><br><span class="line">                XC_MethodReplacement.returnConstant(<span class="literal">true</span>) <span class="comment">// 替换方法，始终返回 true</span></span><br><span class="line">            )</span><br><span class="line">            XposedBridge.log(<span class="string">&quot;Hook isvip 成功&quot;</span>) <span class="comment">// Hook 成功的日志</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">            <span class="comment">// 捕获异常并打印日志，便于调试</span></span><br><span class="line">            XposedBridge.log(<span class="string">&quot;Hook isvip 失败: <span class="subst">$&#123;e.message&#125;</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>安装这个模块的方式也很简单，直接点击运行就可以了</p>
+<p>需要注意的是，要勾选上这个，不然更新脚本很麻烦。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/dd46de163713de9049d8d2e4ddad8880_720.jpg" alt="img"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/image-20250504221129488.png" alt="image-20250504221129488"></p>
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><p>通过执行可以看到，最后isvip被成功hook,而且在LSposed的应用中也能够看到输出的日志。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/15897b41cac8f0016aa07d8290ee89dc_720.jpg" alt="img"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/e3a4c574193e5c788c3a7ea90d19a898.jpg" alt="img"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2025/05/15/android-re-8/">https://www.xuanworld.top/2025/05/15/android-re-8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/android/">android</a></div><div class="post_share"><div class="social-share" data-image="/img/android.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/05/15/android-re-9/"><img class="prev-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android逆向学习（九） Xposed快速上手（下）</div></div></a></div><div class="next-post pull-right"><a href="/2025/05/15/android-re-7/"><img class="next-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android逆向学习（七）绕过root检测与smali修改学习</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android上传文件到服务器</div></div></a></div><div><a href="/2023/08/30/NDK1/" title="Android Native Code开发学习（一）环境配置"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（一）环境配置</div></div></a></div><div><a href="/2023/08/30/NDK2/" title="Android Native Code开发学习（二）"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（二）</div></div></a></div><div><a href="/2023/08/30/NDK3/" title="Android Native Code开发学习（三）对类进行操作"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（三）对类进行操作</div></div></a></div><div><a href="/2022/05/18/android-contact/" title="Android获取通讯录信息"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android获取通讯录信息</div></div></a></div><div><a href="/2023/09/03/android-re-1/" title="Android逆向学习（一）vscode进行android逆向修改并重新打包"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="title">Android逆向学习（一）vscode进行android逆向修改并重新打包</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0%EF%BC%88%E5%85%AB%EF%BC%89Xposed%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B-%E4%B8%8A"><span class="toc-number">1.</span> <span class="toc-text">Android逆向学习（八）Xposed快速上手(上)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">1.3.</span> <span class="toc-text">环境准备</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E7%8E%AF%E5%A2%83"><span class="toc-number">1.3.1.</span> <span class="toc-text">手机环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%B5%E8%84%91%E7%8E%AF%E5%A2%83"><span class="toc-number">1.3.2.</span> <span class="toc-text">电脑环境</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#settings-gradle-kts"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">settings.gradle.kts</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#build-gradle-kts-app%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E9%82%A3%E4%B8%AA"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">build.gradle.kts(app目录下的那个)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E5%86%99LSposed%E8%84%9A%E6%9C%AC"><span class="toc-number">1.4.</span> <span class="toc-text">编写LSposed脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">1.4.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC%E7%BC%96%E5%86%99"><span class="toc-number">1.4.2.</span> <span class="toc-text">脚本编写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-number">1.4.3.</span> <span class="toc-text">运行结果</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（十） IDA逆向编辑Android so文件"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件">Android逆向学习（十） IDA逆向编辑Android so文件</a><time datetime="2025-05-15T13:02:54.000Z" title="发表于 2025-05-15 21:02:54">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-9/" title="Android逆向学习（九） Xposed快速上手（下）"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（九） Xposed快速上手（下）"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-9/" title="Android逆向学习（九） Xposed快速上手（下）">Android逆向学习（九） Xposed快速上手（下）</a><time datetime="2025-05-15T13:02:46.000Z" title="发表于 2025-05-15 21:02:46">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-8/" title="Android逆向学习（八）Xposed快速上手(上)"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（八）Xposed快速上手(上)"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-8/" title="Android逆向学习（八）Xposed快速上手(上)">Android逆向学习（八）Xposed快速上手(上)</a><time datetime="2025-05-15T13:02:10.000Z" title="发表于 2025-05-15 21:02:10">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-7/" title="Android逆向学习（七）绕过root检测与smali修改学习"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（七）绕过root检测与smali修改学习"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-7/" title="Android逆向学习（七）绕过root检测与smali修改学习">Android逆向学习（七）绕过root检测与smali修改学习</a><time datetime="2025-05-15T13:01:38.000Z" title="发表于 2025-05-15 21:01:38">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-6/" title="Android逆向学习（六）绕过app签名校验（上）"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（六）绕过app签名校验（上）"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-6/" title="Android逆向学习（六）绕过app签名校验（上）">Android逆向学习（六）绕过app签名校验（上）</a><time datetime="2025-05-15T13:01:13.000Z" title="发表于 2025-05-15 21:01:13">2025-05-15</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

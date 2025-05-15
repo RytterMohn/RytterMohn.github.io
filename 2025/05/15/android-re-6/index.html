@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Android逆向学习（六）绕过app签名校验（上） | xuanworld</title><meta name="keywords" content="android"><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Android逆向学习（六）绕过app签名校验（上）一、写在前面这是吾爱破解正己大大教程的第五个作业，然后我的系统还是ubuntu，建议先看一下上一个博客，关于动态调试的，因为我这才发现动态调试是真的有很大用处，然后我们开始今天的教程（拖更很久了,刚保研完就被老师拉着开始做项目，抽空出一期博客，这一节博客问题其实挺多的，如果有不对的地方请指出，不胜感激） 二、任务目标 破解签名，使程序可以正常运行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android逆向学习（六）绕过app签名校验（上）">
+<meta property="og:url" content="https://www.xuanworld.top/2025/05/15/android-re-6/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="Android逆向学习（六）绕过app签名校验（上）一、写在前面这是吾爱破解正己大大教程的第五个作业，然后我的系统还是ubuntu，建议先看一下上一个博客，关于动态调试的，因为我这才发现动态调试是真的有很大用处，然后我们开始今天的教程（拖更很久了,刚保研完就被老师拉着开始做项目，抽空出一期博客，这一节博客问题其实挺多的，如果有不对的地方请指出，不胜感激） 二、任务目标 破解签名，使程序可以正常运行">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.xuanworld.top/img/android.jpg">
+<meta property="article:published_time" content="2025-05-15T13:01:13.000Z">
+<meta property="article:modified_time" content="2025-05-15T13:01:33.863Z">
+<meta property="article:author" content="Rytter">
+<meta property="article:tag" content="android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.xuanworld.top/img/android.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2025/05/15/android-re-6/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Android逆向学习（六）绕过app签名校验（上）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-05-15 21:01:33'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/android.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Android逆向学习（六）绕过app签名校验（上）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-15T13:01:13.000Z" title="发表于 2025-05-15 21:01:13">2025-05-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-15T13:01:33.863Z" title="更新于 2025-05-15 21:01:33">2025-05-15</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Android逆向学习（六）绕过app签名校验（上）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Android逆向学习（六）绕过app签名校验（上）"><a href="#Android逆向学习（六）绕过app签名校验（上）" class="headerlink" title="Android逆向学习（六）绕过app签名校验（上）"></a>Android逆向学习（六）绕过app签名校验（上）</h1><h2 id="一、写在前面"><a href="#一、写在前面" class="headerlink" title="一、写在前面"></a>一、写在前面</h2><p>这是吾爱破解正己大大教程的第五个作业，然后我的系统还是ubuntu，建议先看一下上一个博客，关于动态调试的，因为我这才发现动态调试是真的有很大用处，然后我们开始今天的教程（拖更很久了,刚保研完就被老师拉着开始做项目，抽空出一期博客，这一节博客问题其实挺多的，如果有不对的地方请指出，不胜感激）</p>
+<h2 id="二、任务目标"><a href="#二、任务目标" class="headerlink" title="二、任务目标"></a>二、任务目标</h2><ol>
+<li>破解签名，使程序可以正常运行</li>
+</ol>
+<h2 id="三、实现方法"><a href="#三、实现方法" class="headerlink" title="三、实现方法"></a>三、实现方法</h2><h3 id="1-破解签名防止闪退"><a href="#1-破解签名防止闪退" class="headerlink" title="1. 破解签名防止闪退"></a>1. 破解签名防止闪退</h3><p>我们先简单看一下这个反编译之后的java文件</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004205012.png" alt="20231004205012"></p>
+<p>这里有个check，以及system终结的一个代码</p>
+<p>解决方法具体有两种，一种简单的方法就是直接更改函数的返回值，让他只返回true</p>
+<p>我们分析一下checkSign的代码</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004205325.png" alt="20231004205325"></p>
+<p>最主要就是修改这个地方，把false改成true</p>
+<p>我们发现areEqual调用后有一个分支，就说明改变这个分支就可以了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004205711.png" alt="20231004205711"></p>
+<p>我们直接修改smali代码后就是这样的</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004211445.png" alt="20231004211445"></p>
+<p>然后我们就可以看到这个页面是什么样子的了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004211546.png" alt="20231004211546"></p>
+<p>然后还有一种方式就是我们动态调试一下,然后我们直接改变这个hash值</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004211853.png" alt="20231004211853"></p>
+<p>就是这个hash值，这个就是这个软件原来的hash，因为我们对这个软件进行了很多修改，所以现在的hash和原来的hash已经不一样了，所以我们需要改成和现在一样</p>
+<p>我们直接在areEqual上面这里打一个断点，然后开始一步一步往下走，就可以看到这样：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004213430.png" alt="20231004213430"></p>
+<p>这很明显就是要进行比较的两个值，然后我们把这个修改一下就可以了</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004213554.png" alt="20231004213554"></p>
+<p>然后我们打包运行一下（上一个方法的 add-int/lit8 v1, v1, 0x1 代码已经去除了 ）</p>
+<p>发现是可以进行运行的</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231004213918.png" alt="20231004213918"></p>
+<h3 id="2-关于剩余的签名"><a href="#2-关于剩余的签名" class="headerlink" title="2.关于剩余的签名"></a>2.关于剩余的签名</h3><p>然后我这里一直有一些bug就是我点击验证总是会出问题，就是程序直接卡死，讲道理不应该这样才对，然后我直接debug动态调试发现是so校验的时候会卡死，讲道理不应该呀，我用真机测试也会出现这种情况，通过JEB进行动态调试之后发现就是在loadLibrary的时候会出现这个问题</p>
+<p>搞了好久都不知道怎么回事，就只能把这个签名校验直接干掉了（字面意义上的干掉）</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20231005160820.png" alt="20231005160820"></p>
+<p>就是这三行直接全部消灭掉，当然这样一般肯定是有问题的，so文件里面一般都会有一些可能其他进程需要的函数，所以我建议最好不要用这个方法，我是实在没办法了才这样，要是不这样我可能连着好几天都没法更新新的blog，所以请大家见谅</p>
+<p>但是不管如何我都会遇到这个问题，难不成因为版本问题？算了不管了先这样。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240108204430.png" alt="20240108204430"></p>
+<p>后来我想了想，不如反编译so文件看看，说不定可以看到哪里有问题，然后我们反编译后是这样</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240108211748.png" alt="20240108211748"></p>
+<p>突然间想到，说不定是因为我把名称改成了东北往事，然后load的时候名称对不上</p>
+<p>重新把东北往事换成了wuaipojie，结果还是完蛋，点击验证还是闪退，看来跟这个没关系，问题只有天知道了，就删掉继续吧，这样我们需要面对的就是API签名校验，CRC校验和hash校验</p>
+<h3 id="3-新API校验"><a href="#3-新API校验" class="headerlink" title="3.新API校验"></a>3.新API校验</h3><p>我们同样进行一个逆向，直接看源代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">useNewAPICheck</span><span class="params">()</span> &#123;</span><br><span class="line">        String str;</span><br><span class="line">        Signature[] signatureArr;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">28</span>) &#123;</span><br><span class="line">                signatureArr = getPackageManager().getPackageInfo(getPackageName(), <span class="number">134217728</span>).signingInfo.getApkContentsSigners();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                signatureArr = getPackageManager().getPackageInfo(getPackageName(), <span class="number">64</span>).signatures;</span><br><span class="line">            &#125;</span><br><span class="line">            str = MD5Utils.INSTANCE.MD5(Base64Utils.INSTANCE.encodeToString(signatureArr[<span class="number">0</span>].toByteArray()));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (PackageManager.NameNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            str = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Log.e(<span class="string">&quot;zj2595&quot;</span>, <span class="string">&quot;newsign:&quot;</span> + str);</span><br><span class="line">        <span class="keyword">return</span> Intrinsics.areEqual(<span class="string">&quot;074f64af5821ae6aa1ac1779ad5687ad&quot;</span>, str);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这个就是新API校验的函数，当然按照正己大大的教程，我们是可以得到这个Log.e中的这个信息，那我们就先按照正己大大的教程，查看一下这个log就行了，我采用的方法是直接用adb看</p>
+<p>首先打开终端，adb连接后打开shell，然后使用logcat关键词查询，就可以看到这个</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240108220253.png" alt="20240108220253"></p>
+<p>这个然后复制过去，替换掉就可以了，就像这样</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240108220314.png" alt="20240108220314"></p>
+<p>但是这就有一个问题了，一半正常情况下是不会有人专门log出来，所以这个方法在实战中是没有用处的，所以一般来说，我们的操作有</p>
+<ol>
+<li>动态调试找到这个str</li>
+<li>直接强行修改返回值，永远返回一个true</li>
+</ol>
+<p>这两招是比较实用的</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240108220447.png" alt="20240108220447"></p>
+<h3 id="4-CRC校验（有问题，请先看完再实际操作）"><a href="#4-CRC校验（有问题，请先看完再实际操作）" class="headerlink" title="4.CRC校验（有问题，请先看完再实际操作）"></a>4.CRC校验（有问题，请先看完再实际操作）</h3><p>这个方法也差不多，首先看一下crc校验的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">check_crc</span><span class="params">(<span class="type">long</span> j)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">ZipEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ZipFile</span>(getPackageCodePath()).getEntry(<span class="string">&quot;classes.dex&quot;</span>);</span><br><span class="line">        Log.e(<span class="string">&quot;zj2595&quot;</span>, <span class="string">&quot;dexCrc:&quot;</span> + entry.getCrc());</span><br><span class="line">        <span class="keyword">return</span> entry.getCrc() == j;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于这个j我也看到了，我把相关代码摘出来</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">我们可以看到相关的代码有一个j</span><br><span class="line"></span><br><span class="line">textView5.setText(challengeFifth.check_crc(j) ? <span class="string">&quot;通过&quot;</span> : <span class="string">&quot;不通过&quot;</span>);</span><br><span class="line"></span><br><span class="line">然后我们找到这个函数的参数</span><br><span class="line">（TextView textView, ChallengeFifth challengeFifth, TextView textView2, TextView textView3, TextView textView4, TextView textView5, <span class="type">long</span> j, TextView textView6, TextView textView7, View view）</span><br><span class="line"></span><br><span class="line">顺藤摸瓜往上找，找到了</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="variable">parseLong</span> <span class="operator">=</span> Long.parseLong(getString(<span class="number">2131755055</span>));</span><br><span class="line"></span><br><span class="line">button.setOnClickListener(<span class="keyword">new</span> <span class="title class_">ChallengeFifth$</span>.ExternalSyntheticLambda0(textView, <span class="built_in">this</span>, textView2, textView3, textView6, textView4, parseLong, textView5, textView7));</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这时候就比较难办了，修改也不好修改(强行修改返回值我不讲了，这个方法算作弊了，我们就学习一种新的破解方法)</p>
+<p>原教程io重定向写的有点简略了，然后这个其实用frida可以很方便，我们在后面会详细讲到frida，这里我觉得我们就直接写，先对frida有个了解。</p>
+<p>frida的安装我在之前的博客写过了，就是camodroid和tracedroid那篇，这里我们就直接使用，根据代码分析是getPackageCodePath()获得的地址，我们查看一下这个代码</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240109120111.png" alt="20240109120111"></p>
+<p>这个是在android.content.ContextWrapper下面，之后我们就hook一下试一试</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> frida</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">on_message</span>(<span class="params">messages, data</span>):</span><br><span class="line">    <span class="keyword">if</span> messages[<span class="string">&quot;type&quot;</span>] == <span class="string">&quot;send&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[+] &#123;&#125;&quot;</span>.<span class="built_in">format</span>(messages[<span class="string">&quot;payload&quot;</span>]))</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;[+] &#123;&#125;&quot;</span>.<span class="built_in">format</span>(messages))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> name <span class="keyword">in</span> messages:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;[+] &#123;&#125;&quot;</span>.<span class="built_in">format</span>(messages[name]))</span><br><span class="line"></span><br><span class="line">process = frida.get_usb_device().attach(<span class="string">&#x27;东北往事&#x27;</span>)</span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;frida.js&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    script = process.create_script(f.read())</span><br><span class="line">    <span class="comment"># 这是将frida 的脚本给读取进来了</span></span><br><span class="line">script.on(<span class="string">&quot;message&quot;</span>, on_message)</span><br><span class="line">script.load()</span><br><span class="line">sys.stdin.read()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下面是frida的js脚本</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;android.content.ContextWrapper&quot;</span>).<span class="property">getPackageCodePath</span>.<span class="property">implementation</span>=<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> result = <span class="variable language_">this</span>.<span class="title function_">getPackageCodePath</span>();</span><br><span class="line">        <span class="title function_">send</span>(result);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>我们运行的结果是</p>
+<blockquote>
+<p>‘/data/app/~~VEf27Hz4Vx9zDMiZ-UPXZQ==/com.zj.wuaipojie-Qpx1v_KIH3iiBblSp6vvtg==/base.apk’</p>
+</blockquote>
+<p>这就是运行的路径了</p>
+<p>所以我们目前的思路就是更改这个获取路径方法的返回值，将它定位到其他地方，我们当然可以直接hook check_crc的函数，但是这样还是一种作弊的方式吧，因为我写这个博客不是为了完成52的作业，而是学习更多的技术，如果是hook check_crc方法的话用下面这个脚本。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;com.zj.wuaipojie.ui.ChallengeFifth&quot;</span>).<span class="property">check_crc</span>.<span class="title function_">overload</span>(<span class="string">&#x27;long&#x27;</span>).<span class="property">implementation</span> = <span class="keyword">function</span> (<span class="params">j</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> result = <span class="variable language_">this</span>.<span class="title function_">check_crc</span>(j);</span><br><span class="line">        <span class="title function_">send</span>(result);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>如果按我们之前的思路，那就开始更改路径</p>
+<p>我们的方法就是，将这个返回值，给修改成我们放入原始包的地址，这样它检测的地址就是我们没有修改的包，说干就干.</p>
+<p>我们还是首先把这个的apk包，用adb工具给发送到手机上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb push 52demo.apk /data/local/tmp</span><br><span class="line">cp /data/local/tmp/base.apk /data/user/0/com.zj.wuaipojie/files/</span><br></pre></td></tr></table></figure>
+<p>然后我们修改返回值为这个地址加apk文件名</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;android.content.ContextWrapper&quot;</span>).<span class="property">getPackageCodePath</span>.<span class="property">implementation</span>=<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> result = <span class="variable language_">this</span>.<span class="title function_">getPackageCodePath</span>();</span><br><span class="line">        <span class="title function_">send</span>(result);</span><br><span class="line">        <span class="keyword">var</span> javaString = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;java.lang.String&quot;</span>)</span><br><span class="line">        <span class="keyword">var</span> newstring = javaString.$new(<span class="string">&quot;/data/user/0/com.zj.wuaipojie/files/base.apk&quot;</span>)</span><br><span class="line">        <span class="title function_">send</span>(newstring)</span><br><span class="line">        <span class="keyword">return</span> newstring;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>然后扯淡的地方来了，这个始终不会出现crc校验通过，我不知道为什么会这样，按照道理来说应该是没问题的才对啊，这个就直接跳过了，不过这个思路是完全没有问题的，我感觉可能是因为版本对不上导致的，所以我直接hook crc函数算了，如果大家知道这个问题的话请联系我（可能是因为我用的第13节课的课件？最多只到7关的那个，可能是这个原因，等以后我换换试试）</p>
+<p>这个就先这样过了吧</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240109214318.png" alt="20240109214318"></p>
+<h2 id="三、结尾"><a href="#三、结尾" class="headerlink" title="三、结尾"></a>三、结尾</h2><p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/20240109214942.png" alt="20240109214942"></p>
+<p>还是虎哥镇楼，作为我csdn博客的封面</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2025/05/15/android-re-6/">https://www.xuanworld.top/2025/05/15/android-re-6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/android/">android</a></div><div class="post_share"><div class="social-share" data-image="/img/android.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/05/15/android-re-7/"><img class="prev-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android逆向学习（七）绕过root检测与smali修改学习</div></div></a></div><div class="next-post pull-right"><a href="/2025/05/15/android-re-5/"><img class="next-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android逆向学习（五）app进行动态调试</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android上传文件到服务器</div></div></a></div><div><a href="/2023/08/30/NDK1/" title="Android Native Code开发学习（一）环境配置"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（一）环境配置</div></div></a></div><div><a href="/2023/08/30/NDK2/" title="Android Native Code开发学习（二）"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（二）</div></div></a></div><div><a href="/2023/08/30/NDK3/" title="Android Native Code开发学习（三）对类进行操作"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（三）对类进行操作</div></div></a></div><div><a href="/2022/05/18/android-contact/" title="Android获取通讯录信息"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android获取通讯录信息</div></div></a></div><div><a href="/2023/09/03/android-re-1/" title="Android逆向学习（一）vscode进行android逆向修改并重新打包"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="title">Android逆向学习（一）vscode进行android逆向修改并重新打包</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0%EF%BC%88%E5%85%AD%EF%BC%89%E7%BB%95%E8%BF%87app%E7%AD%BE%E5%90%8D%E6%A0%A1%E9%AA%8C%EF%BC%88%E4%B8%8A%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">Android逆向学习（六）绕过app签名校验（上）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="toc-number">1.1.</span> <span class="toc-text">一、写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BB%BB%E5%8A%A1%E7%9B%AE%E6%A0%87"><span class="toc-number">1.2.</span> <span class="toc-text">二、任务目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%B3%95"><span class="toc-number">1.3.</span> <span class="toc-text">三、实现方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%A0%B4%E8%A7%A3%E7%AD%BE%E5%90%8D%E9%98%B2%E6%AD%A2%E9%97%AA%E9%80%80"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 破解签名防止闪退</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%85%B3%E4%BA%8E%E5%89%A9%E4%BD%99%E7%9A%84%E7%AD%BE%E5%90%8D"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.关于剩余的签名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%96%B0API%E6%A0%A1%E9%AA%8C"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.新API校验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-CRC%E6%A0%A1%E9%AA%8C%EF%BC%88%E6%9C%89%E9%97%AE%E9%A2%98%EF%BC%8C%E8%AF%B7%E5%85%88%E7%9C%8B%E5%AE%8C%E5%86%8D%E5%AE%9E%E9%99%85%E6%93%8D%E4%BD%9C%EF%BC%89"><span class="toc-number">1.3.4.</span> <span class="toc-text">4.CRC校验（有问题，请先看完再实际操作）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%BB%93%E5%B0%BE"><span class="toc-number">1.4.</span> <span class="toc-text">三、结尾</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（十） IDA逆向编辑Android so文件"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件">Android逆向学习（十） IDA逆向编辑Android so文件</a><time datetime="2025-05-15T13:02:54.000Z" title="发表于 2025-05-15 21:02:54">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-9/" title="Android逆向学习（九） Xposed快速上手（下）"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（九） Xposed快速上手（下）"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-9/" title="Android逆向学习（九） Xposed快速上手（下）">Android逆向学习（九） Xposed快速上手（下）</a><time datetime="2025-05-15T13:02:46.000Z" title="发表于 2025-05-15 21:02:46">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-8/" title="Android逆向学习（八）Xposed快速上手(上)"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（八）Xposed快速上手(上)"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-8/" title="Android逆向学习（八）Xposed快速上手(上)">Android逆向学习（八）Xposed快速上手(上)</a><time datetime="2025-05-15T13:02:10.000Z" title="发表于 2025-05-15 21:02:10">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-7/" title="Android逆向学习（七）绕过root检测与smali修改学习"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（七）绕过root检测与smali修改学习"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-7/" title="Android逆向学习（七）绕过root检测与smali修改学习">Android逆向学习（七）绕过root检测与smali修改学习</a><time datetime="2025-05-15T13:01:38.000Z" title="发表于 2025-05-15 21:01:38">2025-05-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-6/" title="Android逆向学习（六）绕过app签名校验（上）"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（六）绕过app签名校验（上）"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-6/" title="Android逆向学习（六）绕过app签名校验（上）">Android逆向学习（六）绕过app签名校验（上）</a><time datetime="2025-05-15T13:01:13.000Z" title="发表于 2025-05-15 21:01:13">2025-05-15</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
