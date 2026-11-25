@@ -1,0 +1,270 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>LifeBuddy：在手机本地运行的个人 Android AI 助手 | xuanworld</title><meta name="keywords" content="android,AI"><meta name="author" content="Rytter"><meta name="copyright" content="Rytter"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="LifeBuddy：在手机本地运行的个人 Android AI 助手最近一直在做自己的个人 Android AI 助手项目——LifeBuddy（小布），目前已经迭代到 0.2.0-alpha18，开源放在 GitHub 上，今天写一篇博客系统介绍一下它的设计思路、核心功能、实测效果和架构实现。  GitHub 仓库：https:&#x2F;&#x2F;github.com&#x2F;RytterMohn&#x2F;LifeBuddy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LifeBuddy：在手机本地运行的个人 Android AI 助手">
+<meta property="og:url" content="https://www.xuanworld.top/2026/11/25/lifebuddy/index.html">
+<meta property="og:site_name" content="xuanworld">
+<meta property="og:description" content="LifeBuddy：在手机本地运行的个人 Android AI 助手最近一直在做自己的个人 Android AI 助手项目——LifeBuddy（小布），目前已经迭代到 0.2.0-alpha18，开源放在 GitHub 上，今天写一篇博客系统介绍一下它的设计思路、核心功能、实测效果和架构实现。  GitHub 仓库：https:&#x2F;&#x2F;github.com&#x2F;RytterMohn&#x2F;LifeBuddy">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-cover.jpg">
+<meta property="article:published_time" content="2026-11-25T05:15:00.000Z">
+<meta property="article:modified_time" content="2026-11-25T12:57:20.196Z">
+<meta property="article:author" content="Rytter">
+<meta property="article:tag" content="android">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-cover.jpg"><link rel="shortcut icon" href="/img/photo.jpg"><link rel="canonical" href="https://www.xuanworld.top/2026/11/25/lifebuddy/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LifeBuddy：在手机本地运行的个人 Android AI 助手',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-25 20:57:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/photo.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">45</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-cover.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">xuanworld</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">LifeBuddy：在手机本地运行的个人 Android AI 助手</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-25T05:15:00.000Z" title="发表于 2026-11-25 13:15:00">2026-11-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-25T12:57:20.196Z" title="更新于 2026-11-25 20:57:20">2026-11-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="LifeBuddy：在手机本地运行的个人 Android AI 助手"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="LifeBuddy：在手机本地运行的个人-Android-AI-助手"><a href="#LifeBuddy：在手机本地运行的个人-Android-AI-助手" class="headerlink" title="LifeBuddy：在手机本地运行的个人 Android AI 助手"></a>LifeBuddy：在手机本地运行的个人 Android AI 助手</h1><p>最近一直在做自己的个人 Android AI 助手项目——<strong>LifeBuddy（小布）</strong>，目前已经迭代到 <code>0.2.0-alpha18</code>，开源放在 GitHub 上，今天写一篇博客系统介绍一下它的设计思路、核心功能、实测效果和架构实现。</p>
+<ul>
+<li>GitHub 仓库：<a target="_blank" rel="noopener" href="https://github.com/RytterMohn/LifeBuddy">https://github.com/RytterMohn/LifeBuddy</a></li>
+<li>测试版 APK 下载：<a target="_blank" rel="noopener" href="https://github.com/RytterMohn/LifeBuddy/releases">Releases</a></li>
+<li>开源协议：MIT</li>
+</ul>
+<hr>
+<h2 id="一、为什么做-LifeBuddy？"><a href="#一、为什么做-LifeBuddy？" class="headerlink" title="一、为什么做 LifeBuddy？"></a>一、为什么做 LifeBuddy？</h2><p>现在桌面端的 Agent 工具已经非常多，但在手机端，大多数方案要么是纯聊天套壳，要么严重依赖云端中转后台，或者做成写死流程的“某某 App 专用脚本”。</p>
+<p>我做 LifeBuddy 的初衷很直接：<strong>把 Agent 的执行循环、工具调用、记忆、技能和历史记录都留在 Android 本机运行，只把对话与单步规划交给用户自己配置的云端大模型。</strong></p>
+<p>给它一句自然语言目标，它会通过 Android 无障碍服务读取当前界面结构、选择合适的工具执行下一步，并在每一步之后重新观察和核对结果。默认无需在手机里下载体积庞大的本地大模型，开箱就能用。</p>
+<hr>
+<h2 id="二、核心能力"><a href="#二、核心能力" class="headerlink" title="二、核心能力"></a>二、核心能力</h2><p>LifeBuddy 只保留了两个核心模式：<strong>聊天模式</strong>（问答、写作、读取技能资料）和<strong>操作模式</strong>（由模型根据目标自主选择应用和工具执行任务），不做僵化的“QQ 模式”或“外卖模式”。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>能力模块</th>
+<th>当前实现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>多轮对话</strong></td>
+<td>流式回复（SSE）、Markdown 渲染、多轮上下文管理、内置计算器与时间工具</td>
+</tr>
+<tr>
+<td><strong>手机操作</strong></td>
+<td>打开应用、查找控件、点击、输入、搜索、滚动、返回，支持跨 App 协同任务</td>
+</tr>
+<tr>
+<td><strong>系统工具</strong></td>
+<td>闹钟、计时器、常见系统设置入口，以及页面支持的开关与滑块操作</td>
+</tr>
+<tr>
+<td><strong>历史与记忆</strong></td>
+<td>本机 SQLite 会话历史、检索与续聊；可编辑的长期记忆与习惯记录</td>
+</tr>
+<tr>
+<td><strong>从任务中学习</strong></td>
+<td>从有完成证据的成功流程中提取参数化试用技能，按需复用并管理失效版本</td>
+</tr>
+<tr>
+<td><strong>外部扩展</strong></td>
+<td>支持导入 <code>SKILL.md</code> / ZIP 技能包，支持连接 HTTPS MCP 工具服务</td>
+</tr>
+<tr>
+<td><strong>双语界面</strong></td>
+<td>支持跟随系统、中文、English，切换语言保留当前会话</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="三、实测演示：一句话自动发-QQ-消息"><a href="#三、实测演示：一句话自动发-QQ-消息" class="headerlink" title="三、实测演示：一句话自动发 QQ 消息"></a>三、实测演示：一句话自动发 QQ 消息</h2><p>下面以一个真实任务为例，演示在 <strong>Operate（操作模式）</strong> 下输入一句自然语言指令：</p>
+<blockquote>
+<p>“用 QQ 给 Rytter 发送一个 你好”</p>
+</blockquote>
+<h3 id="1-主界面下达目标"><a href="#1-主界面下达目标" class="headerlink" title="1. 主界面下达目标"></a>1. 主界面下达目标</h3><p>在操作模式下直接输入目标，无需提前选择任何特定 App 模式，模型会自动决定需要打开的应用和工具：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-home-operate.jpg" alt="LifeBuddy 操作模式主界面"></p>
+<h3 id="2-任务运行与悬浮控制条"><a href="#2-任务运行与悬浮控制条" class="headerlink" title="2. 任务运行与悬浮控制条"></a>2. 任务运行与悬浮控制条</h3><p>开始执行后，顶部会出现悬浮状态条（<code>LifeBuddy · Running</code>），实时显示当前规划步骤，并且随时可以点击 <strong>Pause / Stop</strong> 接管或终止任务：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-running-overlay.jpg" alt="任务执行中与悬浮控制条"></p>
+<h3 id="3-完整执行轨迹与核对机制"><a href="#3-完整执行轨迹与核对机制" class="headerlink" title="3. 完整执行轨迹与核对机制"></a>3. 完整执行轨迹与核对机制</h3><p>整个任务共耗时 16 秒（4 次规划、0 次重规划、5 个步骤），每一步的工具调用、耗时和核对结果都会完整记录在历史中：</p>
+<ul>
+<li>第 1 步 <code>phone_open_app</code>：打开 QQ；</li>
+<li>第 2 步 <code>phone_prepare_message</code>：整理收件人与消息原文“你好”；</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-steps-1.jpg" alt="执行步骤 1-2：打开应用与整理消息"></p>
+<ul>
+<li>第 3 步 <code>phone_type</code>：在已确认与 Rytter 的聊天输入框中填写正文并校验（<code>Entered text verified</code>）；</li>
+<li>第 4 步 <code>phone_send_message</code>：核对收件人与正文后点击发送；</li>
+<li>第 5 步 <code>phone_verify_message</code>：本机核对页面结果，且明确遵循“不盲目自动重发”的安全语义；</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-steps-2.jpg" alt="执行步骤 3-5：输入、发送与结果核对"></p>
+<h3 id="4-最终效果"><a href="#4-最终效果" class="headerlink" title="4. 最终效果"></a>4. 最终效果</h3><p>打开 QQ 聊天窗口，消息已成功发送：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-qq-result-v2.jpg" alt="QQ 聊天窗口最终发送效果"></p>
+<hr>
+<h2 id="四、架构设计与关键机制"><a href="#四、架构设计与关键机制" class="headerlink" title="四、架构设计与关键机制"></a>四、架构设计与关键机制</h2><p>项目的架构参考了 Hermes、OpenCode、OpenClaw 等 Agent 在上下文、记忆和工具组织上的思路，并针对 Android 移动端场景做了完全重写。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">用户请求 ──▶ 同一会话与历史 ──▶ 云端模型（对话 / 单步规划）</span><br><span class="line">                                       ▲          │</span><br><span class="line">                             按需技能与记忆        ▼</span><br><span class="line">                                            本机参数与状态校验</span><br><span class="line">                                                  │</span><br><span class="line">                                                  ▼</span><br><span class="line">                                            持久化执行意图</span><br><span class="line">                                              ╱        ╲</span><br><span class="line">                                             ▼          ▼</span><br><span class="line">                                    无障碍 / 系统工具   HTTPS MCP 服务</span><br><span class="line">                                             ╲          ╱</span><br><span class="line">                                              ▼        ▼</span><br><span class="line">                                            页面观察与结果核对 ──▶ 回写会话</span><br></pre></td></tr></table></figure>
+<h3 id="1-模块划分"><a href="#1-模块划分" class="headerlink" title="1. 模块划分"></a>1. 模块划分</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">app/       Android UI、AccessibilityService 无障碍执行、本地存储、HTTP 与运行控制</span><br><span class="line">core/      Agent 循环、页面与动作协议、上下文压缩、记忆、技能、MCP 与单元测试</span><br><span class="line">fixture/   不联网的独立测试应用（不打入主 APK）</span><br><span class="line">cli/       本地文本 Agent 的桌面调试入口</span><br><span class="line">native/    可选的 llama.cpp JNI 实验路径</span><br><span class="line">examples/  可直接导入的技能包与 MCP 配置模板</span><br><span class="line">docs/      安装使用、架构语义、扩展开发与测试文档</span><br></pre></td></tr></table></figure>
+<p>其中 <code>core/</code> 进一步拆分为 <code>core/cloud</code>（流式解析、工具配对、上下文预算与滚动摘要）、<code>core/phone</code>（页面协议、运行器、恢复预算与完成证据）、<code>core/learning</code>（参数化技能生成与失效管理）以及 <code>core/extensions</code>（技能导入、分页检索与 MCP 生命周期）。</p>
+<h3 id="2-技能和-MCP-工具不全部塞进上下文"><a href="#2-技能和-MCP-工具不全部塞进上下文" class="headerlink" title="2. 技能和 MCP 工具不全部塞进上下文"></a>2. 技能和 MCP 工具不全部塞进上下文</h3><p>很多 Agent 一接多工具就会把上下文撑爆。LifeBuddy 采用的是<strong>按需检索加载</strong>：</p>
+<ol>
+<li>先检索技能与工具摘要；</li>
+<li>仅按需读取相关技能正文或某一个具体工具的参数定义；</li>
+<li>最后再发起执行调用。</li>
+</ol>
+<p>因此无论外部 MCP 服务暴露了多少个工具，模型侧始终只面对固定的搜索、读取和调用入口。仓库里也自带了 <a target="_blank" rel="noopener" href="https://github.com/RytterMohn/LifeBuddy/blob/main/examples/extensions/daily-brief.zip">每日计划技能包</a> 和 <a target="_blank" rel="noopener" href="https://github.com/RytterMohn/LifeBuddy/blob/main/examples/extensions/mcp.example.json">MCP JSON 模板</a> 可以直接试用。</p>
+<h3 id="3-单步规划与外部动作一致性"><a href="#3-单步规划与外部动作一致性" class="headerlink" title="3. 单步规划与外部动作一致性"></a>3. 单步规划与外部动作一致性</h3><p>手机界面是动态变化的，一次性规划十步往往走到第二步页面就变了。LifeBuddy 在执行语义上做了几项约束：</p>
+<ul>
+<li><strong>单步规划 + 页面变更校验</strong>：模型每次只规划下一步；如果在执行前页面已经发生变化，本机校验层会拒绝旧动作并进行有限重规划（单次任务上限 40 个步骤槽位、10 分钟）。</li>
+<li><strong>执行意图先持久化</strong>：任何外部操作发出前先落盘记录执行意图；如果发出后遇到断线、取消或缺少足够证据，状态会保持待确认，网络层不会盲目自动重试 MCP <code>tools/call</code>，避免重复触发副作用。</li>
+<li><strong>可随时接管</strong>：操作模式下随时可以暂停或停止，也能在设置中限定允许操作的应用白名单。</li>
+</ul>
+<h3 id="4-长期记忆与技能自学习"><a href="#4-长期记忆与技能自学习" class="headerlink" title="4. 长期记忆与技能自学习"></a>4. 长期记忆与技能自学习</h3><ul>
+<li><strong>记忆</strong>：只保存用户明确表达的事实或偏好，不保存内部推理；习惯候选需要用户确认。</li>
+<li><strong>自学习技能</strong>：基于带有完成证据的成功任务片段，将具体输入抽象为参数、剥离过期的界面节点和坐标，保留可复核的流程。当不同参数多次复用成功后会更新验证状态；一旦 App 改版导致连续失配，会自动暂停失效技能。</li>
+</ul>
+<hr>
+<h2 id="五、数据隐私与当前边界"><a href="#五、数据隐私与当前边界" class="headerlink" title="五、数据隐私与当前边界"></a>五、数据隐私与当前边界</h2><h3 id="数据放在哪里？"><a href="#数据放在哪里？" class="headerlink" title="数据放在哪里？"></a>数据放在哪里？</h3><ul>
+<li>会话历史、长期记忆、技能与执行记录全部保存在手机私有目录；</li>
+<li>模型 API Key 和 MCP 认证头通过 <strong>Android Keystore</strong> 加密存储；</li>
+<li>LifeBuddy 不提供内置模型账号，也不经过任何自有中转服务器；</li>
+<li>不被动录制日常操作，不用你的手机数据训练模型。</li>
+</ul>
+<h3 id="当前版本边界（0-2-0-alpha18）"><a href="#当前版本边界（0-2-0-alpha18）" class="headerlink" title="当前版本边界（0.2.0-alpha18）"></a>当前版本边界（0.2.0-alpha18）</h3><ul>
+<li>手机控制依赖系统可访问的界面文字与控件树，纯自绘、无标签或纯视觉页面可能无法操作；</li>
+<li>暂不支持验证码处理、支付、外卖最终下单、持续后台无人值守以及桌面 <code>stdio</code> / <code>npx</code> 类 MCP 插件；</li>
+<li>本地 Gemma / <code>llama.cpp</code> 属于实验代码，默认 APK 不包含本地模型或原生推理库，目前手机操作仍使用云端规划。</li>
+</ul>
+<hr>
+<h2 id="六、快速上手与源码构建"><a href="#六、快速上手与源码构建" class="headerlink" title="六、快速上手与源码构建"></a>六、快速上手与源码构建</h2><h3 id="直接体验"><a href="#直接体验" class="headerlink" title="直接体验"></a>直接体验</h3><ol>
+<li>前往 <a target="_blank" rel="noopener" href="https://github.com/RytterMohn/LifeBuddy/releases">Releases</a> 下载最新测试版 APK 安装（要求 Android 8.0+）。</li>
+<li>打开侧边栏 → 设置，填入支持 OpenAI Chat Completions / function tools 的 HTTPS API 地址、模型名和 API Key。</li>
+<li>先在<strong>聊天模式</strong>确认模型连通，再在系统设置中开启 LifeBuddy 的无障碍服务。</li>
+<li>切换到<strong>操作模式</strong>，可以先试一句简单指令，比如：<blockquote>
+<p>“打开备忘录，新建一条写着 LifeBuddy 测试的笔记并保存。”</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="从源码构建"><a href="#从源码构建" class="headerlink" title="从源码构建"></a>从源码构建</h3><p>环境要求：<strong>JDK 17</strong>、<strong>Android SDK Platform 34</strong>、<strong>Build Tools 34.0.0</strong>（仓库自带 Gradle 8.9 Wrapper，普通构建不需要模型 Key 或 NDK）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/RytterMohn/LifeBuddy.git</span><br><span class="line">cd LifeBuddy</span><br><span class="line">./gradlew :core:test :app:testDebugUnitTest :app:lintDebug :app:assembleDebug</span><br></pre></td></tr></table></figure>
+<p>Windows 下将 <code>./gradlew</code> 替换为 <code>gradlew.bat</code> 即可，构建产物位于 <code>app/build/outputs/apk/debug/app-debug.apk</code>。</p>
+<hr>
+<h2 id="七、写在最后"><a href="#七、写在最后" class="headerlink" title="七、写在最后"></a>七、写在最后</h2><p>LifeBuddy 目前还在持续迭代中，很多真实 App 的页面适配和复杂跨应用流程也还在打磨。如果你对 Android Agent、无障碍自动化或者移动端 MCP 扩展感兴趣，欢迎去 GitHub 点个 Star，或者直接提 Issue / PR 一起交流！</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top">Rytter</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://www.xuanworld.top/2026/11/25/lifebuddy/">https://www.xuanworld.top/2026/11/25/lifebuddy/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://www.xuanworld.top" target="_blank">xuanworld</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/android/">android</a><a class="post-meta__tags" href="/tags/AI/">AI</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-cover.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/gh/overtrue/share.js@master/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/05/05/android-re-knight-frida/"><img class="next-cover" src="/img/android.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">某气骑士 libtprt.so 反 Frida 机制分析与绕过</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/05/18/AndroidUpload/" title="Android上传文件到服务器"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android上传文件到服务器</div></div></a></div><div><a href="/2023/08/30/NDK1/" title="Android Native Code开发学习（一）环境配置"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（一）环境配置</div></div></a></div><div><a href="/2023/08/30/NDK2/" title="Android Native Code开发学习（二）"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（二）</div></div></a></div><div><a href="/2023/08/30/NDK3/" title="Android Native Code开发学习（三）对类进行操作"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-30</div><div class="title">Android Native Code开发学习（三）对类进行操作</div></div></a></div><div><a href="/2022/05/18/android-contact/" title="Android获取通讯录信息"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-18</div><div class="title">Android获取通讯录信息</div></div></a></div><div><a href="/2023/09/03/android-re-1/" title="Android逆向学习（一）vscode进行android逆向修改并重新打包"><img class="cover" src="/img/android.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-03</div><div class="title">Android逆向学习（一）vscode进行android逆向修改并重新打包</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/photo.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rytter</div><div class="author-info__description">IT</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">45</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/RytterMohn" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:RytterMohn@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#LifeBuddy%EF%BC%9A%E5%9C%A8%E6%89%8B%E6%9C%BA%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C%E7%9A%84%E4%B8%AA%E4%BA%BA-Android-AI-%E5%8A%A9%E6%89%8B"><span class="toc-number">1.</span> <span class="toc-text">LifeBuddy：在手机本地运行的个人 Android AI 助手</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E5%81%9A-LifeBuddy%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">一、为什么做 LifeBuddy？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="toc-number">1.2.</span> <span class="toc-text">二、核心能力</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%AE%9E%E6%B5%8B%E6%BC%94%E7%A4%BA%EF%BC%9A%E4%B8%80%E5%8F%A5%E8%AF%9D%E8%87%AA%E5%8A%A8%E5%8F%91-QQ-%E6%B6%88%E6%81%AF"><span class="toc-number">1.3.</span> <span class="toc-text">三、实测演示：一句话自动发 QQ 消息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%B8%BB%E7%95%8C%E9%9D%A2%E4%B8%8B%E8%BE%BE%E7%9B%AE%E6%A0%87"><span class="toc-number">1.3.1.</span> <span class="toc-text">1. 主界面下达目标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BB%BB%E5%8A%A1%E8%BF%90%E8%A1%8C%E4%B8%8E%E6%82%AC%E6%B5%AE%E6%8E%A7%E5%88%B6%E6%9D%A1"><span class="toc-number">1.3.2.</span> <span class="toc-text">2. 任务运行与悬浮控制条</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%8C%E6%95%B4%E6%89%A7%E8%A1%8C%E8%BD%A8%E8%BF%B9%E4%B8%8E%E6%A0%B8%E5%AF%B9%E6%9C%BA%E5%88%B6"><span class="toc-number">1.3.3.</span> <span class="toc-text">3. 完整执行轨迹与核对机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%9C%80%E7%BB%88%E6%95%88%E6%9E%9C"><span class="toc-number">1.3.4.</span> <span class="toc-text">4. 最终效果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%85%B3%E9%94%AE%E6%9C%BA%E5%88%B6"><span class="toc-number">1.4.</span> <span class="toc-text">四、架构设计与关键机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86"><span class="toc-number">1.4.1.</span> <span class="toc-text">1. 模块划分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8A%80%E8%83%BD%E5%92%8C-MCP-%E5%B7%A5%E5%85%B7%E4%B8%8D%E5%85%A8%E9%83%A8%E5%A1%9E%E8%BF%9B%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-number">1.4.2.</span> <span class="toc-text">2. 技能和 MCP 工具不全部塞进上下文</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%8D%95%E6%AD%A5%E8%A7%84%E5%88%92%E4%B8%8E%E5%A4%96%E9%83%A8%E5%8A%A8%E4%BD%9C%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">1.4.3.</span> <span class="toc-text">3. 单步规划与外部动作一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%95%BF%E6%9C%9F%E8%AE%B0%E5%BF%86%E4%B8%8E%E6%8A%80%E8%83%BD%E8%87%AA%E5%AD%A6%E4%B9%A0"><span class="toc-number">1.4.4.</span> <span class="toc-text">4. 长期记忆与技能自学习</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%95%B0%E6%8D%AE%E9%9A%90%E7%A7%81%E4%B8%8E%E5%BD%93%E5%89%8D%E8%BE%B9%E7%95%8C"><span class="toc-number">1.5.</span> <span class="toc-text">五、数据隐私与当前边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="toc-number">1.5.1.</span> <span class="toc-text">数据放在哪里？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E7%89%88%E6%9C%AC%E8%BE%B9%E7%95%8C%EF%BC%880-2-0-alpha18%EF%BC%89"><span class="toc-number">1.5.2.</span> <span class="toc-text">当前版本边界（0.2.0-alpha18）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B%E4%B8%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA"><span class="toc-number">1.6.</span> <span class="toc-text">六、快速上手与源码构建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E4%BD%93%E9%AA%8C"><span class="toc-number">1.6.1.</span> <span class="toc-text">直接体验</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E6%BA%90%E7%A0%81%E6%9E%84%E5%BB%BA"><span class="toc-number">1.6.2.</span> <span class="toc-text">从源码构建</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-number">1.7.</span> <span class="toc-text">七、写在最后</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/11/25/lifebuddy/" title="LifeBuddy：在手机本地运行的个人 Android AI 助手"><img src="https://cdn.jsdelivr.net/gh/RytterMohn/img/lifebuddy-cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LifeBuddy：在手机本地运行的个人 Android AI 助手"/></a><div class="content"><a class="title" href="/2026/11/25/lifebuddy/" title="LifeBuddy：在手机本地运行的个人 Android AI 助手">LifeBuddy：在手机本地运行的个人 Android AI 助手</a><time datetime="2026-11-25T05:15:00.000Z" title="发表于 2026-11-25 13:15:00">2026-11-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/05/05/android-re-knight-frida/" title="某气骑士 libtprt.so 反 Frida 机制分析与绕过"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="某气骑士 libtprt.so 反 Frida 机制分析与绕过"/></a><div class="content"><a class="title" href="/2026/05/05/android-re-knight-frida/" title="某气骑士 libtprt.so 反 Frida 机制分析与绕过">某气骑士 libtprt.so 反 Frida 机制分析与绕过</a><time datetime="2026-05-05T06:34:16.000Z" title="发表于 2026-05-05 14:34:16">2026-05-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/09/android-re-11/" title="Android逆向学习（十一） IDA动态调试Android so文件"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（十一） IDA动态调试Android so文件"/></a><div class="content"><a class="title" href="/2026/01/09/android-re-11/" title="Android逆向学习（十一） IDA动态调试Android so文件">Android逆向学习（十一） IDA动态调试Android so文件</a><time datetime="2026-01-09T13:35:41.000Z" title="发表于 2026-01-09 21:35:41">2026-01-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/01/09/android-re-knight/" title="最新版某气骑士分析记录-绕过某讯的防御dump内存并解密存档"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="最新版某气骑士分析记录-绕过某讯的防御dump内存并解密存档"/></a><div class="content"><a class="title" href="/2026/01/09/android-re-knight/" title="最新版某气骑士分析记录-绕过某讯的防御dump内存并解密存档">最新版某气骑士分析记录-绕过某讯的防御dump内存并解密存档</a><time datetime="2026-01-09T13:35:17.000Z" title="发表于 2026-01-09 21:35:17">2026-01-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件"><img src="/img/android.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android逆向学习（十） IDA逆向编辑Android so文件"/></a><div class="content"><a class="title" href="/2025/05/15/android-re-10/" title="Android逆向学习（十） IDA逆向编辑Android so文件">Android逆向学习（十） IDA逆向编辑Android so文件</a><time datetime="2025-05-15T13:02:54.000Z" title="发表于 2025-05-15 21:02:54">2025-05-15</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Rytter</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
